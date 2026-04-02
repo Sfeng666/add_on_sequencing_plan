@@ -242,6 +242,18 @@ Sample order: **plan rows first** (same order as the CSV for that omic), then sa
 
 Run `uv run python code/plan_addon_sequencing.py --help` for the full list.
 
+## Git repository
+
+This tree is intended to be a **standalone** Git repo. After `git init`, use a remote you control, for example:
+
+```bash
+git remote add origin git@github.com:<YOUR_USER>/add_on_sequencing_plan.git
+git branch -M main
+git push -u origin main
+```
+
+Create an **empty** repository on GitHub first (no README/license) if it does not exist yet. SSH push requires your GitHub SSH key; use HTTPS with a personal access token if you prefer.
+
 ## Constants (ATAC special sample)
 
 Defined in `plan_addon_sequencing.py`:
