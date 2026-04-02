@@ -1,0 +1,10 @@
+[project]
+name = "addon-ug-sequencing-plan"
+version = "0.1.0"
+description = "Plan add-on UG sequencing from MultiQC + demux stats"
+requires-python = ">=3.10"
+dependencies = [
+    "matplotlib>=3.8",
+    "openpyxl>=3.1.5",
+    "pandas>=2.0",
+]
