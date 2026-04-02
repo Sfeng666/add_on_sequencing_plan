@@ -71,7 +71,7 @@ uv run python code/plan_addon_sequencing.py --skip-pooling-xlsx
 | `code/effective_reads_plots.py` | Before/after effective-read bar plots (per omic) |
 | `code/pooling_workbook.py` | Pooling Excel generation |
 | `data/input/` | MultiQC tables, demux JSONs (mirrored paths), and pooling `.xlsx` templates |
-| `data/output/` | Generated **CSV**, plots, and **`*_pooling.xlsx`** |
+| `data/output/` | Generated **CSV**, plots, **`*_pooling.xlsx`**; optional **`*_pooling_final.xlsx`** (manually curated; see [Manual adjustment](#manual-adjustment-of-the-pooling-workbook)) |
 | `prompt.md` | Optional local rules (not tracked; see [.gitignore](.gitignore)) |
 
 ## Effective reads (per omic)
@@ -130,7 +130,8 @@ The column is **`round(E + delta_scaled)`** (nearest integer). That can sit **be
 | Artifact | Link |
 |----------|------|
 | Read plan (CSV) | [addon_sequencing_15_16_16.csv](data/output/addon_sequencing_15_16_16.csv) |
-| Pooling workbook (Excel) | [addon_sequencing_15_16_16_pooling.xlsx](data/output/addon_sequencing_15_16_16_pooling.xlsx) |
+| Pooling workbook (Excel, **script output**) | [addon_sequencing_15_16_16_pooling.xlsx](data/output/addon_sequencing_15_16_16_pooling.xlsx) |
+| Pooling workbook (**lab-adjusted example**) | [addon_sequencing_15_16_16_pooling_final.xlsx](data/output/addon_sequencing_15_16_16_pooling_final.xlsx) — see [Manual adjustment of the pooling workbook](#manual-adjustment-of-the-pooling-workbook) |
 | ATAC-seq before/after plot | [addon_sequencing_15_16_16_ATAC_seq_effective_reads_before_after.png](data/output/addon_sequencing_15_16_16_ATAC_seq_effective_reads_before_after.png) |
 | RNA-seq before/after plot | [addon_sequencing_15_16_16_RNA_seq_effective_reads_before_after.png](data/output/addon_sequencing_15_16_16_RNA_seq_effective_reads_before_after.png) |
 | sRNA-seq before/after plot | [addon_sequencing_15_16_16_sRNA_seq_effective_reads_before_after.png](data/output/addon_sequencing_15_16_16_sRNA_seq_effective_reads_before_after.png) |
@@ -141,7 +142,7 @@ All paths are under [`data/output/`](data/output/). Regenerate this example from
 uv run python code/plan_addon_sequencing.py --n-atac 14 --n-rna 16 --n-srna 16
 ```
 
-A full below-median run (no caps) uses different counts in the filename; the default `uv run python code/plan_addon_sequencing.py` produces whatever row totals apply to your inputs.
+A full below-median run (no caps) uses different counts in the filename; the default `uv run python code/plan_addon_sequencing.py` produces whatever row totals apply to your inputs. **The example files checked into this repo** correspond to the capped **`15_16_16`** run above (not an uncapped full cohort export).
 
 ### 1. Read plan CSV
 
@@ -172,7 +173,7 @@ A full below-median run (no caps) uses different counts in the filename; the def
 
 **Path pattern:** `data/output/<prefix>_<n_atac>_<n_rna>_<n_srna>_pooling.xlsx`
 
-**Example:** [addon_sequencing_15_16_16_pooling.xlsx](data/output/addon_sequencing_15_16_16_pooling.xlsx)
+**Example (automatic):** [addon_sequencing_15_16_16_pooling.xlsx](data/output/addon_sequencing_15_16_16_pooling.xlsx)
 
 **Sheets:**
 
@@ -199,6 +200,19 @@ Sample block columns **A–M** (see row above the first library on each sheet):
 - `data/input/pooling_for_ngs_all_samples.xlsx` (sheet `Pool1_2`)
 
 Libraries missing from a template are **omitted** from that pool’s sheet with a **stderr warning**.
+
+#### Manual adjustment of the pooling workbook
+
+The spreadsheet the script writes encodes **read targets**, **demux-based molarity correction**, and **template geometry** (pool volume and target nM in the yellow summary, dilution rules when undiluted volume is &lt; 1 µL). In the lab, that first-pass file often needs edits before submission.
+
+**Example (same capped plan as above):** [addon_sequencing_15_16_16_pooling_final.xlsx](data/output/addon_sequencing_15_16_16_pooling_final.xlsx) is a **manually adjusted** copy of [addon_sequencing_15_16_16_pooling.xlsx](data/output/addon_sequencing_15_16_16_pooling.xlsx). Typical reasons to edit include:
+
+- **Physical volume available** — reported undiluted or “volume for pool” µL may exceed what remains in the tube after QC pulls or minimum safe volume.
+- **Sequencer / core requirements** — required **final pool concentration (nM)**, **total µL** delivered, or per-library limits may differ from the numbers left in the template yellow block when the workbook was generated.
+- **Pipetting and dilution** — rounding, switching dilution factors, or avoiding awkward aliquots so the bench protocol is reliable.
+- **Read balance vs. chemistry** — small shifts to volumes or summary nM to match what the facility will actually load, while keeping libraries in roughly the intended read proportions.
+
+Treat **`*_pooling.xlsx`** as the reproducible **computational** artifact and a **`*_pooling_final.xlsx`** (or similar name) as the **operator-curated** version you hand to the sequencing provider.
 
 **Name mapping (templates → `sample_id`):**
 
